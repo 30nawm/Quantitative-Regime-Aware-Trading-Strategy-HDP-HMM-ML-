@@ -1,0 +1,11 @@
+numpy
+pandas
+yfinance
+arch
+ssm-learn
+tensorflow
+tensorflow-probability
+scikit-learn
+xgboost
+plotly
+colorama
