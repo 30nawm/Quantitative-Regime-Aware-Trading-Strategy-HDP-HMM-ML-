@@ -1,4 +1,63 @@
-Quantitative Regime-Aware Trading Strategy (HDP-HMM & ML)This repository contains a full-stack, institutional-grade pipeline for algorithmic trading. The core thesis is that financial markets are non-stationary. Instead of applying a single static model, this framework first identifies the market's current "personality" or regime and then deploys specialized machine learning models to generate high-conviction trading signals based on that context.The system leverages advanced Bayesian statistics to discover regimes automatically and uses a multi-layered feature set to feed a robust ML-driven forecasting and backtesting engine.🚀 Core Models & Techniques1. Regime Detection: Sticky HDP-HMMThe cornerstone of this project is the Sticky Hierarchical Dirichlet Process Hidden Markov Model (HDP-HMM).Why HDP? Unlike standard HMMs where the number of states ($K$) must be manually specified, the HDP-HMM is a non-parametric Bayesian model that autonomously discovers the optimal number of regimes directly from the data.Why "Sticky"? The "stickiness" parameter ($\kappa$) introduces a self-transition bias, forcing the model to find persistent, durable regimes. This aligns perfectly with financial reality, where bull/bear markets or volatility clusters persist for extended periods, avoiding the noise of rapid, meaningless state-switching.2. Feature EngineeringThe ML models are fed a rich, context-aware feature set:Regime Probabilities: The direct posterior probabilities from the HDP-HMM (e.g., [0.1, 0.8, 0.1]) serve as the model's primary context vector.Regime-Specific Volatility (MS-GARCH): A separate GARCH(1,1) model is fitted to the returns within each discovered regime, generating a dynamic forecast of expected volatility given the current regime.Price Action: Raw candlestick psychology is captured via features like body size, wick length (upper/lower), and overnight gaps.Statistical Arbitrage: Momentum (rolling returns) and mean-reversion (Z-Score) features are included to capture statistical deviations.3. Target Labeling: The Triple Barrier Method (TBM)We move beyond simple "up/down" classification. Targets are labeled using the Triple Barrier Method, which simulates a realistic trade:Label 1 (Buy): The price hits the profit-take barrier (e.g., +3%) before hitting the stop-loss.Label -1 (Sell): The price hits the stop-loss barrier (e.g., -2%) before hitting the profit-take.Label 0 (Hold): The time-barrier (e.g., 10 days) is hit before either price barrier.4. Forecasting ModelsTwo distinct models are trained and compared on this multi-class classification task:XGBoost: A gradient-boosted decision tree model, renowned for its performance on structured, tabular data.Neural Network (NN): A deep feed-forward network (FFNN) designed to capture complex, non-linear interactions between the features.5. Backtesting & EvaluationThe strategy is evaluated using a high-conviction, event-driven backtester:Signal Generation: Trades are only initiated on high-probability signals (e.g., P(Buy) > 0.9 or P(Sell) > 0.9), filtering for A+ setups.Performance Metrics: The strategy's risk-adjusted performance is rigorously measured against the market benchmark (Buy & Hold).Sharpe Ratio: Risk-adjusted return.Sortino Ratio: Adjusts returns for downside (bad) volatility only.Calmar Ratio: Adjusts returns by the maximum drawdown, measuring recovery efficiency.Comparative Analysis: We plot both cumulative returns and 1-year rolling returns to assess performance consistency across different market cycles.📂 Project Structurequant-regime-strategy/
+-----
+
+# Quantitative Regime-Aware Trading Strategy (HDP-HMM & ML)
+
+This repository contains a full-stack, institutional-grade pipeline for algorithmic trading. The core thesis is that financial markets are non-stationary. Instead of applying a single static model, this framework first identifies the market's current "personality" or **regime** and then deploys specialized machine learning models to generate high-conviction trading signals based on that context.
+
+The system leverages advanced Bayesian statistics to discover regimes automatically and uses a multi-layered feature set to feed a robust ML-driven forecasting and backtesting engine.
+
+-----
+
+## 🚀 Core Models & Techniques
+
+### 1\. Regime Detection: Sticky HDP-HMM
+
+The cornerstone of this project is the **Sticky Hierarchical Dirichlet Process Hidden Markov Model (HDP-HMM)**.
+
+  * **Why HDP?** Unlike standard HMMs where the number of states ($K$) must be manually specified, the HDP-HMM is a non-parametric Bayesian model that **autonomously discovers the optimal number of regimes** directly from the data.
+  * **Why "Sticky"?** The "stickiness" parameter ($\kappa$) introduces a self-transition bias, forcing the model to find **persistent, durable regimes**. This aligns perfectly with financial reality, where bull/bear markets or volatility clusters persist for extended periods, avoiding the noise of rapid, meaningless state-switching.
+
+### 2\. Feature Engineering
+
+The ML models are fed a rich, context-aware feature set:
+
+  * **Regime Probabilities:** The direct posterior probabilities from the HDP-HMM (e.g., `[0.1, 0.8, 0.1]`) serve as the model's primary context vector.
+  * **Regime-Specific Volatility (MS-GARCH):** A separate `GARCH(1,1)` model is fitted to the returns *within* each discovered regime, generating a dynamic forecast of *expected volatility given the current regime*.
+  * **Price Action:** Raw candlestick psychology is captured via features like body size, wick length (upper/lower), and overnight gaps.
+  * **Statistical Arbitrage:** Momentum (rolling returns) and mean-reversion (Z-Score) features are included to capture statistical deviations.
+
+### 3\. Target Labeling: The Triple Barrier Method (TBM)
+
+We move beyond simple "up/down" classification. Targets are labeled using the **Triple Barrier Method**, which simulates a realistic trade:
+
+  * **Label 1 (Buy):** The price hits the profit-take barrier (e.g., +3%) *before* hitting the stop-loss.
+  * **Label -1 (Sell):** The price hits the stop-loss barrier (e.g., -2%) *before* hitting the profit-take.
+  * **Label 0 (Hold):** The time-barrier (e.g., 10 days) is hit before either price barrier.
+
+### 4\. Forecasting Models
+
+Two distinct models are trained and compared on this multi-class classification task:
+
+  * **XGBoost:** A gradient-boosted decision tree model, renowned for its performance on structured, tabular data.
+  * **Neural Network (NN):** A deep feed-forward network (FFNN) designed to capture complex, non-linear interactions between the features.
+
+### 5\. Backtesting & Evaluation
+
+The strategy is evaluated using a high-conviction, event-driven backtester:
+
+  * **Signal Generation:** Trades are only initiated on high-probability signals (e.g., `P(Buy) > 0.9` or `P(Sell) > 0.9`), filtering for A+ setups.
+  * **Performance Metrics:** The strategy's risk-adjusted performance is rigorously measured against the market benchmark (Buy & Hold).
+      * **Sharpe Ratio:** Risk-adjusted return.
+      * **Sortino Ratio:** Adjusts returns for *downside* (bad) volatility only.
+      * **Calmar Ratio:** Adjusts returns by the maximum drawdown, measuring recovery efficiency.
+  * **Comparative Analysis:** We plot both cumulative returns and 1-year rolling returns to assess performance consistency across different market cycles.
+
+-----
+
+## 📂 Project Structure
+
+```
+quant-regime-strategy/
 │
 ├── quant_regime_model/    # Main source package
 │   ├── __init__.py
@@ -12,8 +71,44 @@ Quantitative Regime-Aware Trading Strategy (HDP-HMM & ML)This repository contain
 ├── config.py                  # All tickers, dates, and model hyperparameters
 ├── requirements.txt           # Project dependencies
 └── README.md                  # This file
-📈 How to RunClone the Repository:Bashgit clone [Your-Repo-Link]
-cd quant-regime-strategy
-Install Dependencies:It is highly recommended to use a Python virtual environment.Bashpip install -r requirements.txt
-(Note: tensorflow and ssm-learn installation may have system-specific requirements.)Configure Pipeline (Optional):Edit config.py to change tickers (e.g., ^GSPC, ^IXIC), date ranges, HMM parameters, or signal thresholds.Execute the Pipeline:Bashpython main.py
-📊 Interpreting the OutputThe script will process each ticker defined in config.py and output:Terminal Report: A console-based summary of the backtest performance (Sharpe, Calmar, Sortino, etc.) for both XGBoost and the Neural Network, benchmarked against Buy & Hold.Interactive Plots (Plotly):Cumulative Returns Plot: The equity curve of the high-conviction strategy versus the market benchmark over the entire test period.1-Year Rolling Returns Plot: A comparison of 1-year rolling performance, revealing how the strategy's alpha generation behaves in different market cycles.
+```
+
+-----
+
+## 📈 How to Run
+
+1.  **Clone the Repository:**
+
+    ```bash
+    git clone [Your-Repo-Link]
+    cd quant-regime-strategy
+    ```
+
+2.  **Install Dependencies:**
+    It is highly recommended to use a Python virtual environment.
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+    *(Note: `tensorflow` and `ssm-learn` installation may have system-specific requirements.)*
+
+3.  **Configure Pipeline (Optional):**
+    Edit `config.py` to change tickers (e.g., `^GSPC`, `^IXIC`), date ranges, HMM parameters, or signal thresholds.
+
+4.  **Execute the Pipeline:**
+
+    ```bash
+    python main.py
+    ```
+
+-----
+
+## 📊 Interpreting the Output
+
+The script will process each ticker defined in `config.py` and output:
+
+1.  **Terminal Report:** A console-based summary of the backtest performance (Sharpe, Calmar, Sortino, etc.) for both XGBoost and the Neural Network, benchmarked against Buy & Hold.
+2.  **Interactive Plots (Plotly):**
+      * **Cumulative Returns Plot:** The equity curve of the high-conviction strategy versus the market benchmark over the entire test period.
+      * **1-Year Rolling Returns Plot:** A comparison of 1-year rolling performance, revealing how the strategy's alpha generation behaves in different market cycles.
